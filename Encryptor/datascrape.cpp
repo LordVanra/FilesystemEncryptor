@@ -251,9 +251,3 @@ std::string scrape()
 
     return userdata;
 }
-
-int main()
-{
-    scrape();
-    return 0;
-}

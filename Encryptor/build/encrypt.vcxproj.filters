@@ -10,6 +10,9 @@
     <ClCompile Include="C:\Users\arnav\Desktop\Code\FilesystemEncryptor\Encryptor\tetris.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\arnav\Desktop\Code\FilesystemEncryptor\Encryptor\datascrape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\arnav\Desktop\Code\FilesystemEncryptor\Encryptor\CMakeLists.txt" />
