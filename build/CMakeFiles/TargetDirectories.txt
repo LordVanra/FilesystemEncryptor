@@ -1,0 +1,3 @@
+C:/Users/arnav/Desktop/Code/SketchyShit/MoreSketchyShit/build/CMakeFiles/encrypt.dir
+C:/Users/arnav/Desktop/Code/SketchyShit/MoreSketchyShit/build/CMakeFiles/edit_cache.dir
+C:/Users/arnav/Desktop/Code/SketchyShit/MoreSketchyShit/build/CMakeFiles/rebuild_cache.dir

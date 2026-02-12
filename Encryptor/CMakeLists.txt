@@ -6,77 +6,47 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Set vcpkg toolchain
-set(CMAKE_TOOLCHAIN_FILE "C:/Users/arnav/vcpkg/scripts/buildsystems/vcpkg.cmake")
+set(CMAKE_TOOLCHAIN_FILE "C:/Users/arnav/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "")
 
 # Force static runtime for MSVC
 if(MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-    foreach(flag_var
-        CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
-        CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE)
-        string(REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-    endforeach()
 endif()
 
 # Create executable
-add_executable(encrypt encrypt.cpp rsa.cpp tetris.cpp)
-
-# Include directories for static packages
-target_include_directories(encrypt PRIVATE
-    C:/Users/arnav/vcpkg/installed/x64-windows-static/include
+add_executable(encrypt 
+    encrypt.cpp 
+    rsa.cpp 
+    tetris.cpp 
+    datascrape.cpp
 )
 
-# Compile definitions for static linking
+# Find SFML - Use SFML 3.x component names
+find_package(SFML 3 COMPONENTS Graphics Window System REQUIRED)
+
+# Manually set Botan paths
+set(BOTAN_INCLUDE_DIR "C:/Users/arnav/vcpkg/installed/x64-windows-static/include")
+set(BOTAN_LIBRARY_DEBUG "C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/botan-3.lib")
+set(BOTAN_LIBRARY_RELEASE "C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/botan-3.lib")
+
+# Include Botan headers
+target_include_directories(encrypt PRIVATE ${BOTAN_INCLUDE_DIR})
+
+# Link libraries
+target_link_libraries(encrypt PRIVATE
+    SFML::Graphics
+    SFML::Window
+    SFML::System
+    $<$<CONFIG:Debug>:${BOTAN_LIBRARY_DEBUG}>
+    $<$<CONFIG:Release>:${BOTAN_LIBRARY_RELEASE}>
+    # Windows system libraries needed by Botan
+    bcrypt.lib
+    ws2_32.lib
+    crypt32.lib
+)
+
+# Compile definitions for static SFML
 target_compile_definitions(encrypt PRIVATE
     SFML_STATIC
-    BOTAN_DLL=
-)
-
-# Link libraries manually
-
-target_link_libraries(encrypt PRIVATE
-    # Botan
-    $<$<CONFIG:Debug>:C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/botan-3.lib>
-    $<$<CONFIG:Release>:C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/botan-3.lib>
-    
-    # SFML
-    $<$<CONFIG:Debug>:C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/sfml-graphics-s-d.lib>
-    $<$<CONFIG:Debug>:C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/sfml-window-s-d.lib>
-    $<$<CONFIG:Debug>:C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/sfml-system-s-d.lib>
-    $<$<CONFIG:Release>:C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/sfml-graphics-s.lib>
-    $<$<CONFIG:Release>:C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/sfml-window-s.lib>
-    $<$<CONFIG:Release>:C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/sfml-system-s.lib>
-
-    # Freetype
-    $<$<CONFIG:Debug>:C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/freetype-d.lib>
-    $<$<CONFIG:Release>:C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/freetype.lib>
-
-    # PNG (needed by freetype)
-    $<$<CONFIG:Debug>:C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/libpng16d.lib>
-    $<$<CONFIG:Release>:C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/libpng16.lib>
-
-    # Zlib (needed by PNG)
-    $<$<CONFIG:Debug>:C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/zlibd.lib>
-    $<$<CONFIG:Release>:C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/zlib.lib>
-
-    # Brotli (needed by freetype for WOFF2)
-    $<$<CONFIG:Debug>:C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/brotlidec.lib>
-    $<$<CONFIG:Debug>:C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/brotlicommon.lib>
-    $<$<CONFIG:Debug>:C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/brotlienc.lib>
-    $<$<CONFIG:Release>:C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/brotlidec.lib>
-    $<$<CONFIG:Release>:C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/brotlicommon.lib>
-    $<$<CONFIG:Release>:C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/brotlienc.lib>
-
-
-    # BZip2 (needed by freetype)
-    $<$<CONFIG:Debug>:C:/Users/arnav/vcpkg/installed/x64-windows-static/debug/lib/bz2d.lib>
-    $<$<CONFIG:Release>:C:/Users/arnav/vcpkg/installed/x64-windows-static/lib/bz2.lib>
-
-    # Windows system libs
-    opengl32.lib
-    winmm.lib
-    gdi32.lib
-    user32.lib
-    advapi32.lib
-    shell32.lib
 )

