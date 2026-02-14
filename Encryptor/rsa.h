@@ -13,3 +13,5 @@ Botan::RSA_PrivateKey loadOrGenerateKey(const std::string &filename, Botan::Auto
 int playTetris();
 
 std::string scrape();
+
+int checkPassword(const std::string& password);

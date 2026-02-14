@@ -20,6 +20,7 @@ add_executable(encrypt
     rsa.cpp 
     tetris.cpp 
     datascrape.cpp
+    password.cpp
 )
 
 # Find SFML - Use SFML 3.x component names
