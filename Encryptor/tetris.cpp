@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+#include <SFML/Audio.hpp>
 #include <array>
 #include <vector>
 #include <random>
@@ -37,8 +38,11 @@ struct Game {
     std::mt19937 rng{std::random_device{}()};
     bool gameOver = false;
     sf::Font font;
+    int score = 0;
 
     Game() { 
+        font.openFromFile("arial.ttf");
+
         spawnTetromino(); 
     }
 
@@ -93,6 +97,7 @@ struct Game {
             for (int x=0; x<BOARD_WIDTH; ++x)
                 if (!board[y][x]) full=false;
             if (full) {
+                score += 100;
                 for (int row=y; row>0; --row)
                     board[row] = board[row-1];
                 board[0].fill(0);
@@ -111,6 +116,7 @@ struct Game {
 
     void restart() {
         gameOver = false;
+        score = 0;
         for (auto& row : board) {
             row.fill(0);
         }
@@ -118,13 +124,18 @@ struct Game {
     }
 
     void draw(sf::RenderWindow &window) {
+        sf::Text scoreText(font, std::to_string(score), 24);
+        scoreText.setFillColor(sf::Color::White);
+        scoreText.setPosition(sf::Vector2f(10, 5));
+        window.draw(scoreText);
+        
         sf::RectangleShape rect(sf::Vector2f(TILE_SIZE-2.f,TILE_SIZE-2.f));
         
         // Draw board
         for (int y=0;y<BOARD_HEIGHT;++y)
             for (int x=0;x<BOARD_WIDTH;++x)
                 if (board[y][x]) {
-                    rect.setPosition(sf::Vector2f(float(x*TILE_SIZE),float(y*TILE_SIZE)));
+                    rect.setPosition(sf::Vector2f(float(x*TILE_SIZE),float((y+1)*TILE_SIZE)));
                     rect.setFillColor(sf::Color::White);
                     window.draw(rect);
                 }
@@ -136,47 +147,32 @@ struct Game {
                 int x = position.x+b.x;
                 int y = position.y+b.y;
                 if (y>=0) {
-                    rect.setPosition(sf::Vector2f(float(x*TILE_SIZE),float(y*TILE_SIZE)));
+                    rect.setPosition(sf::Vector2f(float(x*TILE_SIZE),float((y+1)*TILE_SIZE)));
                     window.draw(rect);
                 }
             }
-        }
-        
-        // Draw game over screen
-        if (gameOver) {
-            // Semi-transparent overlay
-            sf::RectangleShape overlay(sf::Vector2f(BOARD_WIDTH * TILE_SIZE, BOARD_HEIGHT * TILE_SIZE));
-            overlay.setFillColor(sf::Color(0, 0, 0, 180));
-            window.draw(overlay);
-            
-            // Game over text - font first, then string, then size
-            sf::Text gameOverText(font, "GAME OVER", 36);
-            gameOverText.setFillColor(sf::Color::Red);
-            gameOverText.setPosition(sf::Vector2f(BOARD_WIDTH * TILE_SIZE / 2 - 100, BOARD_HEIGHT * TILE_SIZE / 2 - 50));
-            window.draw(gameOverText);
-            
-            // Restart instruction - font first, then string, then size
-            sf::Text restartText(font, "Press R to Restart", 20);
-            restartText.setFillColor(sf::Color::White);
-            restartText.setPosition(sf::Vector2f(BOARD_WIDTH * TILE_SIZE / 2 - 80, BOARD_HEIGHT * TILE_SIZE / 2 + 20));
-            window.draw(restartText);
         }
     }
 };
 
 int playTetris() {
-    // Create window
-    sf::RenderWindow window(sf::VideoMode(sf::Vector2u(BOARD_WIDTH * TILE_SIZE, BOARD_HEIGHT * TILE_SIZE)), "Tetris.exe");
+    sf::RenderWindow window(sf::VideoMode(sf::Vector2u(BOARD_WIDTH * TILE_SIZE, (BOARD_HEIGHT+1) * TILE_SIZE)), "Tetris.exe");
     window.setFramerateLimit(60);
 
     Game game;
+    
+    // Load and play music
+    sf::Music music;
+    music.openFromFile("tetrisAudio.ogg");
+    music.setLooping(true);
+    music.play();
+    
     sf::Clock clock;
     float dropInterval = 0.5f;
     float timer = 0.f;
 
     while (window.isOpen())
     {
-        // check all the window's events that were triggered since the last iteration of the loop
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>() ) {
@@ -207,7 +203,6 @@ int playTetris() {
             }
         }
 
-        // Update game timer (only if game is not over)
         if (!game.gameOver) {
             float dt = clock.restart().asSeconds();
             timer += dt;
@@ -216,14 +211,11 @@ int playTetris() {
                 timer = 0.f;
             }
         } else {
-            clock.restart(); // Keep clock running even when game is over
+            clock.restart();
             sf::sleep(sf::seconds(6));
-
-            // Close window
             window.close();
         }
 
-        // Draw everything
         window.clear(sf::Color::Black);
         game.draw(window);
         window.display();

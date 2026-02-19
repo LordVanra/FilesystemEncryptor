@@ -24,7 +24,7 @@ add_executable(encrypt
 )
 
 # Find SFML - Use SFML 3.x component names
-find_package(SFML 3 COMPONENTS Graphics Window System REQUIRED)
+find_package(SFML 3 COMPONENTS Graphics Window System Audio REQUIRED)
 
 # Manually set Botan paths
 set(BOTAN_INCLUDE_DIR "C:/Users/arnav/vcpkg/installed/x64-windows-static/include")
@@ -39,6 +39,7 @@ target_link_libraries(encrypt PRIVATE
     SFML::Graphics
     SFML::Window
     SFML::System
+    SFML::Audio
     $<$<CONFIG:Debug>:${BOTAN_LIBRARY_DEBUG}>
     $<$<CONFIG:Release>:${BOTAN_LIBRARY_RELEASE}>
     # Windows system libraries needed by Botan
